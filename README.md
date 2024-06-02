@@ -4,7 +4,7 @@
 canvas öğesi tüm ekranı kaplayacak şekilde ayarladım
 WebGL bağlamı ile (gl) elde ettim ve desteklenmiyorsa hata mesajı görüntülenecek.
 
-#Veri Hazırlığı:
+# Veri Hazırlığı:
 
 vertices dizisi, her harfin köşe noktalarını içeren koordinatları tanımlar:
 K, A, D, İ, R harfleri için çizgi koordinatları.
@@ -16,7 +16,7 @@ Temel bir vertexShader ve fragmentShader tanımladım:
 vertexShader ile köşe pozisyonlarını tanımladım.
 fragmentShader ile renkleri tanımladım.
 
-#Çizim Fonksiyonu:
+# Çizim Fonksiyonu:
 
 draw fonksiyonu, ekranı temizler ve her harfi belirli bir renkle çizer:
 K: Kırmızı
