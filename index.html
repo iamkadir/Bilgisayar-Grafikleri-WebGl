@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>WebGL</title>
+  <style>
+    canvas { width: 100%; height: 100% }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const gl = canvas.getContext('webgl');
+
+    if (!gl) {
+      console.error('WebGL desteklenmiyor');
+    } else {
+
+      // Harfler için köşeler K, A, D, İ, R
+      const vertices = new Float32Array([
+        // K
+        -0.9, 0.9, -0.9, 0.5,  // dikey çizgi
+        -0.9, 0.7, -0.7, 0.9,  // Upper diagonal line
+        -0.9, 0.7, -0.7, 0.5,  // Lower diagonal line
+        // A
+        -0.6, 0.5, -0.5, 0.9,  // Left diagonal line
+        -0.5, 0.9, -0.4, 0.5,  // Right diagonal line
+        -0.55, 0.7, -0.45, 0.7, // Middle line
+        // D
+        -0.3, 0.9, -0.3, 0.5,  // dikey çizgi
+        -0.3, 0.9, -0.1, 0.7,  // Upper diagonal line
+        -0.3, 0.5, -0.1, 0.7,  // Lower diagonal line
+        // İ
+        0.0, 0.9, 0.0, 0.5,    // dikey çizgi
+        0.0, 0.95, 0.0, 0.9,   // Dot
+        // R
+        0.1, 0.9, 0.1, 0.5,    // Left vertical line
+        0.1, 0.9, 0.3, 0.9,    // Top horizontal line
+        0.3, 0.9, 0.3, 0.7,    // Right vertical line (top)
+        0.3, 0.7, 0.1, 0.7,    // Middle horizontal line
+        0.1, 0.7, 0.3, 0.5,    // Diagonal line (bottom)
+
+
+      ]);
+
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+      const vertexShaderSource = `
+        attribute vec2 position;
+        void main() {
+          gl_Position = vec4(position, 0.0, 1.0);
+        }
+      `;
+
+      const fragmentShaderSource = `
+        precision mediump float;
+        uniform vec4 color;
+        void main() {
+          gl_FragColor = color;
+        }
+      `;
+
+      function createShader(type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
+        }
+        return shader;
+      }
+
+      const vertexShader = createShader(gl.VERTEX_SHADER, vertexShaderSource);
+      const fragmentShader = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+      const program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error(gl.getProgramInfoLog(program));
+      } else {
+        gl.useProgram(program);
+
+        const positionLocation = gl.getAttribLocation(program, 'position');
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const colorLocation = gl.getUniformLocation(program, 'color');
+
+        function draw() {
+          gl.clear(gl.COLOR_BUFFER_BIT);
+
+          const colors = [
+            [1.0, 0.0, 0.0, 1.0],  // Red for K
+            [0.0, 1.0, 0.0, 1.0],  // Green for A
+            [0.0, 0.0, 1.0, 1.0],  // Blue for D
+            [1.0, 1.0, 0.0, 1.0],  // Yellow for İ
+            [1.0, 0.0, 1.0, 1.0],  // Magenta for R
+          ];
+
+          const letterVertexCounts = [6, 6, 6, 2, 8];
+          let offset = 0;
+
+          for (let i = 0; i < colors.length; i++) {
+            gl.uniform4fv(colorLocation, colors[i]);
+            gl.drawArrays(gl.LINES, offset, letterVertexCounts[i]);
+            offset += letterVertexCounts[i];
+          }
+
+          requestAnimationFrame(draw);
+        }
+
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        draw();
+      }
+    }
+  </script>
+</body>
+</html>
